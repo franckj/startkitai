@@ -1,0 +1,55 @@
+summary: Retrieve harmful categories
+operationId: getHarmfulCategories
+tags:
+  - Moderation
+
+security:
+  - bearer_auth: []
+
+parameters:
+  - $ref: ../common/authorization-parameters.yml#/AuthorizationHeader
+
+description: |-
+  Retrieve the categories used for harmful text.
+  ```js
+  [
+    "sexual",
+    "hate",
+    "harassment",
+    "self-harm",
+    "sexual/minors",
+    "hate/threatening",
+    "violence/graphic",
+    "self-harm/intent",
+    "self-harm/instructions",
+    "harassment/threatening",
+    "violence"
+  ]
+  ```
+responses:
+  '200':
+    description: Fetch a list of harmful content categories.
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            type: string
+          example:
+            [
+              'sexual',
+              'hate',
+              'harassment',
+              'self-harm',
+              'sexual/minors',
+              'hate/threatening',
+              'violence/graphic',
+              'self-harm/intent',
+              'self-harm/instructions',
+              'harassment/threatening',
+              'violence'
+            ]
+  '401':
+    description: Unauthorized, user not authenticated.
+  '500':
+    description: An error occurred.

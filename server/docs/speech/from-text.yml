@@ -1,0 +1,60 @@
+summary: Create speech from text
+operationId: createSpeechFromText
+tags:
+  - Speech
+security:
+  - bearer_auth: []
+
+parameters:
+  - $ref: ../common/authorization-parameters.yml#/AuthorizationHeader
+
+description: |-
+  Create speech from text
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - text
+        properties:
+          text:
+            type: string
+
+      example:
+        text: 'Seize the time... Live now! Make now always the most precious time. Now will never come again. -  Captain Jean-Luc Picard'
+responses:
+  '200':
+    description: Returns an audio file
+    content:
+      audio/mpeg:
+        schema:
+          type: string
+          format: binary
+      audio/opus:
+        schema:
+          type: string
+          format: binary
+      audio/aac:
+        schema:
+          type: string
+          format: binary
+      audio/flac:
+        schema:
+          type: string
+          format: binary
+      audio/wav:
+        schema:
+          type: string
+          format: binary
+      audio/pcm:
+        schema:
+          type: string
+          format: binary
+  '400':
+    description: Bad request, text is required
+  '401':
+    description: Unauthorized, user not authenticated.
+  '500':
+    description: An error occured

@@ -1,0 +1,11 @@
+models:
+  - dall-e-3
+  - dall-e-2
+editModels:
+  - dall-e-2
+
+options:
+  n: 1
+  size: 1024x1024
+  style: vivid
+  quality: standard

@@ -1,0 +1,79 @@
+summary: Check if text is harmful
+operationId: checkHarmfulText
+description: |-
+  Check if some given text is considered harmful. One or more harmful categories will be returned.
+
+  ### Usage
+
+  The harmful text API doesn’t count towards to cost usage limits, as OpenAI actually offers this API for free.
+
+tags:
+  - Moderation
+
+security:
+  - bearer_auth: []
+
+parameters:
+  - $ref: ../common/authorization-parameters.yml#/AuthorizationHeader
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          text:
+            type: string
+        required:
+          - text
+      example:
+        text: 'I want to kill them'
+responses:
+  '200':
+    description: |-
+      Harmfulness analysis result. The result contains a boolean `flagged`, and all
+      the categories that are flagged from the following list.
+      ```json
+      [
+        "sexual",
+        "hate",
+        "harassment",
+        "self-harm",
+        "sexual/minors",
+        "hate/threatening",
+        "violence/graphic",
+        "self-harm/intent",
+        "self-harm/instructions",
+        "harassment/threatening",
+        "violence"
+      ]
+      ```
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            flagged:
+              type: boolean
+              example: true
+            categories:
+              type: array
+              items:
+                enum:
+                  - violence
+                  - sexual
+                  - hate
+                  - harassment
+                  - self-harm
+                  - sexual/minors
+                  - hate/threatening
+                  - violence/graphic
+                  - self-harm/intent
+                  - self-harm/instructions
+                  - harassment/threatening
+  '400':
+    description: Bad request, text is required
+  '401':
+    description: Unauthorized, user not authenticated.
+  '500':
+    description: An error occurred.

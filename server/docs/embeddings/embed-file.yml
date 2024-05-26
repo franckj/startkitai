@@ -1,0 +1,54 @@
+summary: Embed a file
+operationId: embedFile
+description: |-
+  Upload a file to the embeddings database. Text will be extracted from the file,
+  split into chunks, converted to embeddings, and inserted into the embeddings
+  database.
+
+tags:
+  - Embeddings
+security:
+  - bearer_auth: []
+
+parameters:
+  - $ref: ../common/authorization-parameters.yml#/AuthorizationHeader
+
+requestBody:
+  required: true
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        properties:
+          file:
+            type: string
+            format: binary
+            description: File to be uploaded.
+            enum:
+              - pdf
+              - txt
+              - docx
+              - csv
+responses:
+  '200':
+    description: File uploaded successfully.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: 'File uploaded successfully!'
+            contextId:
+              type: string
+              description: The reference identifier for the uploaded file.
+            usage:
+              $ref: '../common/usage-response.yml#/UsageResponse'
+              example:
+                model: 'text-embedding-3-small'
+                cost: 0.0002
+  '400':
+    description: Bad request, no file provided or file type not supported.
+  '500':
+    description: An error occured.

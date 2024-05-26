@@ -1,0 +1,57 @@
+summary: Get sentiment of text
+operationId: getSentiment
+tags:
+  - Moderation
+description: |-
+  Get sentiment of text
+
+security:
+  - bearer_auth: []
+
+parameters:
+  - $ref: ../common/authorization-parameters.yml#/AuthorizationHeader
+
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          text:
+            type: string
+        required:
+          - text
+      example:
+        text: Ugh, this new chef sucks. I'll never eat here again
+
+responses:
+  '200':
+    description: Sentiment analysis result with usage information.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            sentiment:
+              type: object
+              properties:
+                sentiment:
+                  type: string
+                  enum: [positive, negative, neutral]
+                confidence:
+                  type: integer
+                  format: int32
+                  minimum: 0
+                  maximum: 100
+              example:
+                sentiment: 'negative'
+                confidence: 95
+            usage:
+              $ref: '../common/usage-response.yml#/UsageResponse'
+  '400':
+    description: Bad request, text is required
+  '401':
+    description: Unauthorized, user not authenticated.
+  '500':
+    description: An error occurred.

@@ -1,0 +1,62 @@
+summary: Upload documents via URL
+operationId: embedUrls
+description: |-
+  This endpoint allows you to specify multiple URLs. The document at each of the URLs will
+  be fetched, split and upserted into the embeddings database.
+
+  A Context ID will be returned which can be used by the Chat API. If multiple documents
+  are provided they will all have the same Context ID
+
+tags:
+  - Embeddings
+security:
+  - bearer_auth: []
+
+parameters:
+  - $ref: ../common/authorization-parameters.yml#/AuthorizationHeader
+
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          userUuid:
+            type: string
+            format: uuid
+            description: UUID of the user to associate the uploads with.
+          urls:
+            type: array
+            items:
+              type: string
+              format: uri
+            description: An array of URLs pointing to the files to be uploaded.
+          contextId:
+            type: string
+            description: An identifier for the upload context or session.
+          namespace:
+            type: string
+            description: A categorization or grouping label for the uploads.
+        required:
+          - userUuid
+          - urls
+responses:
+  '200':
+    description: Files are being uploaded and processed. Stream of updates is sent as response.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            percentage:
+              type: number
+              format: float
+              description: The percentage of files processed at the point of update.
+            documentId:
+              type: string
+              description: The unique identifier for the document that has just been processed.
+  '400':
+    description: Bad request, user UUID or array of image urls not provided
+  '500':
+    description: An error occured.

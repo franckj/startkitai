@@ -1,0 +1,73 @@
+summary: Redact sensitive information
+operationId: redactSensitiveText
+tags:
+  - Moderation
+security:
+  - bearer_auth: []
+
+parameters:
+  - $ref: ../common/authorization-parameters.yml#/AuthorizationHeader
+description: |-
+  Redact sensitive information from given text.
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          text:
+            type: string
+        required:
+          - text
+      example:
+        text: 'Hello everyone! Anyone here familiar with the new Node.js update? Could you email me at james(at)squarecat.io if you know anything? Or you can phone me 082-34234-44'
+responses:
+  '200':
+    description: Redaction result with usage information.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            result:
+              type: object
+              properties:
+                redactions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        enum: [email_address, phone_number, name, keyword, custom] # Add or modify the enum values as needed based on possible redaction types.
+                      text:
+                        type: string
+                      confidence:
+                        type: integer
+                        format: int32
+                        minimum: 0
+                        maximum: 100
+                        description: 'Confidence score of the redaction as a percentage.'
+                redactedText:
+                  type: string
+                  description: Text after applying redactions with placeholders for redacted content.
+
+              example:
+                redactedText: 'Hello everyone! Anyone here familiar with the new Node.js update? Could you email me at [email_redacted] if you know anything? Or you can phone me at [phone_redacted]'
+                redactions:
+                  - type: 'email_address'
+                    text: 'james(at)squarecat.io'
+                    confidence: 95
+                  - type: 'phone_number'
+                    text: '082-34234-44'
+                    confidence: 90
+
+            usage:
+              $ref: '../common/usage-response.yml#/UsageResponse'
+  '400':
+    description: Bad request, text is required
+  '401':
+    description: Unauthorized, user not authenticated.
+  '500':
+    description: An error occurred.

@@ -1,0 +1,6 @@
+# models are "text-embedding-3-small" or "text-embedding-3-large"
+# see {@link https://platform.openai.com/docs/models/embeddings}
+model: text-embedding-3-small
+# leave dimension blank and it will be
+# selected for you based on the model
+dimension: 1536

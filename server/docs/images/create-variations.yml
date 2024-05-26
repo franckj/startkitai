@@ -1,0 +1,38 @@
+summary: Create image variations
+operationId: createImageVariations
+
+tags:
+  - Images
+security:
+  - bearer_auth: []
+
+parameters:
+  - $ref: ../common/authorization-parameters.yml#/AuthorizationHeader
+
+description: Create variations of a passed in image using `DALL-E` models.
+requestBody:
+  required: true
+  content:
+    multipart/form-data:
+      schema:
+        required:
+          - image
+        type: object
+        properties:
+          image:
+            type: string
+            format: binary
+            description: Original image for creating variations.
+responses:
+  '200':
+    description: Variations created successfully.
+    content:
+      application/json:
+        schema:
+          $ref: '../common/image-response.yml#/ImageResponse'
+  '400':
+    description: Bad request, image is required
+  '401':
+    description: Unauthorized, user not authenticated.
+  '500':
+    description: An error occured

@@ -1,0 +1,1799 @@
+openapi: 3.0.0
+info:
+  title: StartKit.AI API
+  version: 1.0.0
+  description: >
+    # Introduction
+
+
+    The StartKit.AI API allows you to create a starting point for your AI project
+
+    very quickly.
+
+
+    It's emphasis is on simplicity, so we've tried to make the API as easy as possible
+
+    to get started with.
+
+
+    All OpenAI API endpoints that result in a query to their LLM models are supported.
+
+    But the APIs that do account level things such as creating assistants or fine-tunes
+
+    are not implemented, as we either consider them not useful, or replaced by other
+
+    StartKit.AI functionality.
+
+
+
+    ## Endpoints
+
+
+    Our AI endpoints range from simple to complex wrappers around OpenAI's API
+
+    functionality.
+
+
+    They give you all the things that are missing when trying to build a SaaS AI app.
+
+
+    These API pages give you details of the arguments and details needed to call
+
+    the API. Descriptions of how the endpoints work and their justifications can be
+
+    found with the [main website documentation here](https://startkit.ai/docs).
+
+
+    ### [Chat](#tag/Chat)
+
+
+    The main functionality for most AI applications, our Chat endpoints gives you total
+
+    control when allowing your customers to comminicate with a LLM.
+
+
+    - Saves chat history to the database to build longer and smarter context windows
+
+    - Hooks into pre-stored embeddings via context IDs.
+
+    - Uploads and stores created images
+
+    - Fetches files and webpages automatically
+
+
+    See our [Chat Documentation for more info on how Chat works](https://startkit.ai/docs/api/chat).
+
+
+    Or the API reference [here](#tag/Chat).
+
+
+    ### [Images](#tag/Images)
+
+
+    The Images API allows you to access DALL-E models for creating and modifying images.
+
+
+    - Creating images
+
+    - Analyzing images (Vision)
+
+    - Create variations on an image
+
+    - Perform inpainting
+
+    - Perform outpainting
+
+
+    See our [Images Documentation for more info on how Images works](https://startkit.ai/docs/api/images).
+
+
+    Or the API reference [here](#tag/Images).
+
+
+    ### [Moderation](#tag/Moderation)
+
+
+    The Moderation API allows you to use OpenAIs harmful text API, and some of our own custom moderation functions:
+
+
+    - Checking if text is harmful and in what harmful category it falls into
+
+    - Analyzing sentiment
+
+    - Redacting personal information
+
+
+    See our [Moderation Documentation for more info on how Moderation works](https://startkit.ai/docs/api/moderation).
+
+
+    Or the API reference [here](#tag/Moderation).
+
+
+    ### [Speech](#tag/Speech)
+
+
+    The Speech API gives you access to TTS and Whisper models for performing speech-to-text (STT) and text-to-speech (TTS) allowing the following:
+
+
+    - Creating audio from text (TTS)
+
+    - Transcribing audio to text (STT)
+
+    - Translating non-English audio to English text
+
+    - Converting non-English audio to English audio
+
+
+    See our [Speech Documentation for more info on how Speech works](https://startkit.ai/docs/api/speech).
+
+
+    Or the API reference [here](#tag/Speech).
+
+
+    ### [Embeddings](#tag/Embeddings)
+
+
+    Our embeddings API lets you easily send arbitrary data to Pinecone to be vectorized, including:
+
+
+    - Text snippets
+
+    - Text files (.docx, .txt, .pdf, .csv)
+
+    - Multiple files via URL
+
+    - Crawl URLs and embed the text of a webpage (todo)
+
+
+    See our [Embeddings Documentation for more info on how Embeddings works](https://startkit.ai/docs/api/embeddings).
+
+
+    Or the API reference [here](#tag/Embeddings).
+
+
+    ### [Detect](#tag/Detect)
+
+
+    Our Detect API lets you detect if a piece of content is AI generated or not.
+
+
+    - Files/images
+
+
+    See our [Detect Documentation for more info on how Detect works](https://startkit.ai/docs/api/detect).
+
+
+    Or the API reference [here](#tag/Detect).
+
+
+    ## Requests
+
+
+    All requests are made over HTTP(S) using REST.
+
+
+    Some requests are responded to with Server Sent Events (SSE), for easy streaming.
+
+
+
+    ## Authentication
+
+
+    The API is secured by License Keys. When a user is created or signs up for your app, they are issued a license key automatically.
+
+
+    This license key can be used to make requests to the API as a Bearer Token in the Authorization header.
+
+
+    ```http
+
+    Authorization: Bearer sk_c8fcb59d-fad2-467c-b25e-dc4739d82785
+
+    ```
+
+
+    **Note:** In our demos, the users' license key is saved to localStorage when they finish signing in and all requests to the API get the key from localStorage and add it to the request.
+
+
+    Here's an example of making an API request with the license key as a Bearer token from our demos:
+
+
+    ```javascript
+      const licenseKey = localStorage.getItem('licenseKey');
+
+      const response = await fetch('/api/images/create', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${licenseKey}`
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          prompt: 'Make an image of the Starship Enterprise orbiting an alien planet'
+        })
+      });
+    ```
+
+
+    You can read more about how authentication and users are managed in the [product docs](https://startkit.ai/docs/features/users).
+
+
+    ## HTTP Statuses
+
+
+    Along with the HTTP methods that the API responds to, it will also return
+
+    standard HTTP statuses, including error codes.
+
+
+    In the event of a problem, the status will contain the error code, while the
+
+    body of the response will usually contain additional information about the
+
+    problem that was encountered.
+
+
+    In general, if the status returned is in the 200 range, it indicates that
+
+    the request was fulfilled successfully and that no error was encountered.
+
+
+    Return codes in the 400 range typically indicate that there was an issue
+
+    with the request that was sent. Among other things, this could mean that you
+
+    did not authenticate correctly, that you are requesting an action that you
+
+    do not have authorization for, that the object you are requesting does not
+
+    exist, or that your request is malformed.
+
+
+    If you receive a status in the 500 range, this generally indicates a
+
+    server-side problem.
+
+
+    400 and 500 level error responses will include a JSON object in their body,
+
+    including the following attributes:
+
+
+    |Name|Type|Description|
+
+    |--- |--- |--- |
+
+    |code|string|A short identifier corresponding to the HTTP status code returned. For example, the code for a response returning a 404 status code would be "not_found."|
+
+    |message|string|A message providing additional information about the error, including details to help resolve it when possible.|
+
+
+    ### Example Error Response
+
+
+    ```http
+
+    HTTP/1.1 403 Forbidden
+
+    {
+      "code":     "forbidden",
+      "message":  "A license key is required to access this resource."
+    }
+
+    ```
+
+
+    ## Usage
+
+
+    A request that causes a call to OpenAIs API will always return a `usage` property on the
+
+    response (with the exception of the /api/moderaton/harmful endpoint, which is free).
+
+    This will represent the number of tokens used in the AI request, and the total `cost`
+
+    of that request.
+
+
+    The cost is always in USD.
+
+
+
+    ### Sample response with usage
+
+    ```json
+      {
+        "result": {
+          "sentiment": "neutral",
+          "confidence": 100
+        },
+        "usage": [
+          {
+            "model": "gpt-4-turbo",
+            "promptTokens": 53,
+            "completionTokens": 17,
+            "cost": 0.0010400000000000001
+          }
+        ]
+      }
+    ```
+
+
+    ### Sample image response with usage
+
+
+    ```json
+
+    {
+      "images": [{
+        "revisedPrompt": "A dazzling scene unfolds underwater. The star of the show is a magnificent fish. It's a stunning fusion of colors, with shimmering scales that reflect a kaleidoscope of hues: vibrant blues, iridescent greens, rich purples and a touch of gold.",
+        "url": "https://sfo3.digitaloceanspaces.com/startkitai/494226b2-1059-4957-982a-f785b29b57e5/generated-images/4f7c8202-88d7-4840-881b-027351a2d6d1.png"
+      }],
+      "usage": [
+        {
+          "model": "dall-e-3",
+          "size": "1024x1024",
+          "quality": "standard",
+          "cost": 0.04
+        }
+      ]
+    }
+
+    ```
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  contact:
+    name: StartKit.AI Team
+    email: hi@startkit.ai
+  termsOfService: https://startkit.ai/tos
+servers:
+  - url: https://startkit.ai
+    description: Production server (uses live data)
+  - url: http://localhost:1337
+    description: Local development server
+tags:
+  - name: Chat
+    description: Chat API Reference
+  - name: Moderation
+    description: Moderation API Reference
+  - name: Images
+    description: Images API Reference
+  - name: Speech
+    description: Speech API Reference
+  - name: Embeddings
+    description: Embeddings API Reference
+  - name: Detect
+    description: Detect API Reference
+paths:
+  /api/chat:
+    post:
+      summary: Send a chat message
+      operationId: sendChatMessage
+      tags:
+        - Chat
+      description: >-
+        Use this endpoint to send a new message in a chat session and wait for
+
+        a reply from the AI.
+
+
+        ### Server Sent Events
+
+
+        We use event-streams a lot for streaming responses back to the client,
+
+        this is what creates the feeling that the AI is typing it's reply back
+
+        to you in real-time, and means we can send very fast partial responses
+
+        to the user. It's essentially web-sockets but simpler.
+
+
+        The response is returned as `text/event-stream`, **IMPORTANT** make sure
+
+        to provide an `Accept` header with your request so the client can bootstrap
+
+        the connection.
+
+
+        ```Accept: text/event-stream```
+
+
+        ### Chat History (optional)
+
+
+        Chats are organised into sessions, with each session having their history
+
+        stored into the database.
+
+
+        Chat history is determined by a `chatUuid` variable. If no `chatUuid` is
+
+        provided then a new chat session is created and the `chatUuid` for that
+
+        new session will be returned at the end of the stream.
+
+
+        ### Context IDs (optional)
+
+
+        If embeddings have been uploaded via the
+
+        [Embeddings API](https://startkit.ai/api#/paths/api-embeddings-file/post)
+
+        then these can be included in the request using the the `contextIds` variable.
+
+
+        The AI will fetch the context from the embeddings database automatically
+
+        and use that data in it's response.
+
+
+        ### Images (optional)
+
+
+        Images can be provided with the request in base64 format. These images will
+
+        be interpreted by GPT-4-Vision and the description used in the response.
+
+
+        For example you can send the message "what is in this image?" along with an
+
+        image in the image array, and the AI will analyze the image and respond.
+      security:
+        - bearer_auth: []
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+            example: Bearer sk_test_e2ebe714-2d21-4cbd-895e-a8ae3ecc4462
+          description: This request requires a license key to be included in the
+            Authorization header of the request.
+        - in: header
+          name: Accept
+          required: true
+          schema:
+            type: string
+            enum:
+              - text/event-stream
+          description: The server will respond with an event-stream
+        - in: query
+          name: asJson
+          schema:
+            type: boolean
+            default: false
+          description: If you want the server to return the content stream as plain JSON.
+            By default it is base64 encoded.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+                  description: Text of the chat message.
+                  example: What is the prime directive?
+                chatUuid:
+                  type: string
+                  description: UUID of the chat session.
+                  example: ae91fe05-f0fc-4285-a605-2bd4c856edae
+                contextIds:
+                  type: array
+                  items:
+                    type: string
+                  default: []
+                  description: List of context ids you want to use in the request
+                  example:
+                    - 1710012052356-10430406-warp.pdf
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  default: []
+                  example: '[ "data:image/png;base64,iVCAYAAACNbyblAAAAHElEQVQI12Pg==" ]'
+                  description: Images to include in the chat message, in base64 format
+      responses:
+        "200":
+          description: >-
+            The response is Streamed back to the client in Server Sent Events
+            (SSE)
+
+            "named event" format (read more on MDN [here](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#event_stream_format)
+
+            or see the example response.
+
+
+            Each event consists of two lines, an `event` property and a `data` property.
+
+            Each token of content from the AI will be delivered with a `content` event.
+
+
+
+            ```yaml
+
+            # POST http://localhost:1337/api/chat?asJson=true
+
+            # { text: "Hello" }
+
+
+            event: content
+
+            data: ["Hi"]
+
+
+            event: content
+
+            data: ["there"],
+
+
+            event: content
+
+            data: ["how can"]
+
+
+            event: content
+
+            data: ["I help?"]
+
+            ```
+
+
+            The stream will end with a `result` event being sent.
+
+
+            ```yaml
+
+            event: result
+
+            data: {
+              "cost": 0.004,
+              "model": "gpt-4-turbo",
+              "chatUuid": "2c2ddb1e-b6c8-4a74-b2ce-3316147e3043"
+            }
+
+            ```
+
+
+            By default the content in the stream will be base64 encoded, this makes it easy to
+
+            escape special characters and newlines that might otherwise break the stream.
+
+
+            If you want the response to be delivered as above with the text visible for
+
+            debug purposes then provide the query parameter ?asJson=true to the request.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+              example: no-cache
+            Connection:
+              schema:
+                type: string
+              example: keep-alive
+            Content-Type:
+              schema:
+                type: string
+              example: text/event-stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                example: |-
+                  event: content
+                  data: Hi
+
+                  event: content
+                  data: there,
+
+                  event: content
+                  data: how can
+
+                  event: content
+                  data: I help?
+
+                  event: result
+                  data: {
+                    "cost": 0.004,
+                    "model": "gpt-4-turbo",
+                    "chatUuid": "2c2ddb1e-b6c8-4a74-b2ce-3316147e3043"
+                  }
+        "400":
+          description: Bad request, text or at least one image is required.
+        "401":
+          description: Unauthorized, user not authenticated.
+        "406":
+          description: Not acceptable, the Accept header was omitted or was not
+            "text/event-stream" (see above).
+        "429":
+          description: Too many requests, usage limit exceeded.
+        "500":
+          description: An error occurred.
+  "/api/chat/{uuid}/history":
+    get:
+      summary: Retrieve chat history
+      description: Fetches the chat history for a given chat identified by its UUID,
+        excluding system and tool messages.
+      operationId: getChatHistory
+      security:
+        - bearer_auth: []
+      tags:
+        - Chat
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+            example: Bearer sk_test_e2ebe714-2d21-4cbd-895e-a8ae3ecc4462
+          description: >
+            This request requires a license key to be included in the
+            Authorization header of the request.
+        - in: path
+          name: uuid
+          required: true
+          schema:
+            type: string
+          description: The UUID of the chat for which to retrieve the history.
+      responses:
+        "200":
+          description: Chat history retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    uuid:
+                      type: string
+                      format: uuid
+                      description: Unique identifier for the chat message.
+                    content:
+                      type: string
+                      description: The content of the chat message.
+                      example: Hi there, how can I help today?
+                    role:
+                      type: string
+                      enum:
+                        - system
+                        - user
+                        - tool
+                        - function
+                      description: The role associated with this message. See OpenAI's chat API for
+                        more details
+                        (https://platform.openai.com/docs/api-reference/chat/create)
+                    timestamp:
+                      type: string
+                      format: date-time
+                      description: The timestamp when the message was sent.
+                  required:
+                    - uuid
+                    - userUuid
+                    - chatUuid
+                    - content
+                    - role
+                    - timestamp
+        "400":
+          description: Bad request, invalid UUID provided.
+        "401":
+          description: Unauthorized, user not authenticated.
+        "404":
+          description: Not found, chat with the given UUID does not exist.
+        "500":
+          description: An error occurred.
+  "/api/chat/{uuid}/share":
+    put:
+      summary: Mark chat as sharable
+      operationId: markChatSharable
+      description: Updates the chat history to mark it as sharable or not based on the
+        provided flag.
+      tags:
+        - Chat
+      security:
+        - bearer_auth: []
+      parameters:
+        - $ref: "#/paths/~1api~1chat/post/parameters/0"
+        - in: path
+          name: uuid
+          required: true
+          schema:
+            type: string
+          description: The UUID of the chat to update the sharability status.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isSharable:
+                  type: boolean
+                  description: Flag indicating whether the chat history should be marked as
+                    sharable.
+              required:
+                - isSharable
+      responses:
+        "201":
+          description: Chat history marked as sharable successfully.
+        "400":
+          description: Bad request, invalid input provided.
+        "401":
+          description: Unauthorized, user not authenticated.
+        "404":
+          description: Not found, chat with the given UUID does not exist.
+        "500":
+          description: Internal server error.
+  /api/moderation/harmful:
+    post:
+      summary: Check if text is harmful
+      operationId: checkHarmfulText
+      description: >-
+        Check if some given text is considered harmful. One or more harmful
+        categories will be returned.
+
+
+        ### Usage
+
+
+        The harmful text API doesn’t count towards to cost usage limits, as OpenAI actually offers this API for free.
+      tags:
+        - Moderation
+      security:
+        - bearer_auth: []
+      parameters:
+        - $ref: "#/paths/~1api~1chat/post/parameters/0"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+              required:
+                - text
+            example:
+              text: I want to kill them
+      responses:
+        "200":
+          description: >-
+            Harmfulness analysis result. The result contains a boolean
+            `flagged`, and all
+
+            the categories that are flagged from the following list.
+
+            ```json
+
+            [
+              "sexual",
+              "hate",
+              "harassment",
+              "self-harm",
+              "sexual/minors",
+              "hate/threatening",
+              "violence/graphic",
+              "self-harm/intent",
+              "self-harm/instructions",
+              "harassment/threatening",
+              "violence"
+            ]
+
+            ```
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  flagged:
+                    type: boolean
+                    example: true
+                  categories:
+                    type: array
+                    items:
+                      enum:
+                        - violence
+                        - sexual
+                        - hate
+                        - harassment
+                        - self-harm
+                        - sexual/minors
+                        - hate/threatening
+                        - violence/graphic
+                        - self-harm/intent
+                        - self-harm/instructions
+                        - harassment/threatening
+        "400":
+          description: Bad request, text is required
+        "401":
+          description: Unauthorized, user not authenticated.
+        "500":
+          description: An error occurred.
+  /api/moderation/harmful/categories:
+    get:
+      summary: Retrieve harmful categories
+      operationId: getHarmfulCategories
+      tags:
+        - Moderation
+      security:
+        - bearer_auth: []
+      parameters:
+        - $ref: "#/paths/~1api~1chat/post/parameters/0"
+      description: |-
+        Retrieve the categories used for harmful text.
+        ```js
+        [
+          "sexual",
+          "hate",
+          "harassment",
+          "self-harm",
+          "sexual/minors",
+          "hate/threatening",
+          "violence/graphic",
+          "self-harm/intent",
+          "self-harm/instructions",
+          "harassment/threatening",
+          "violence"
+        ]
+        ```
+      responses:
+        "200":
+          description: Fetch a list of harmful content categories.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example:
+                  - sexual
+                  - hate
+                  - harassment
+                  - self-harm
+                  - sexual/minors
+                  - hate/threatening
+                  - violence/graphic
+                  - self-harm/intent
+                  - self-harm/instructions
+                  - harassment/threatening
+                  - violence
+        "401":
+          description: Unauthorized, user not authenticated.
+        "500":
+          description: An error occurred.
+  /api/moderation/sentiment:
+    post:
+      summary: Get sentiment of text
+      operationId: getSentiment
+      tags:
+        - Moderation
+      description: Get sentiment of text
+      security:
+        - bearer_auth: []
+      parameters:
+        - $ref: "#/paths/~1api~1chat/post/parameters/0"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+              required:
+                - text
+            example:
+              text: Ugh, this new chef sucks. I'll never eat here again
+      responses:
+        "200":
+          description: Sentiment analysis result with usage information.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sentiment:
+                    type: object
+                    properties:
+                      sentiment:
+                        type: string
+                        enum:
+                          - positive
+                          - negative
+                          - neutral
+                      confidence:
+                        type: integer
+                        format: int32
+                        minimum: 0
+                        maximum: 100
+                    example:
+                      sentiment: negative
+                      confidence: 95
+                  usage:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        model:
+                          type: string
+                        promptTokens:
+                          type: integer
+                          format: int32
+                        completionTokens:
+                          type: integer
+                          format: int32
+                        cost:
+                          type: number
+                          format: float
+                    example:
+                      model: gpt-4-turbo
+                      promptTokens: 44
+                      completionTokens: 989
+                      cost: 0.012
+        "400":
+          description: Bad request, text is required
+        "401":
+          description: Unauthorized, user not authenticated.
+        "500":
+          description: An error occurred.
+  /api/moderation/redact:
+    post:
+      summary: Redact sensitive information
+      operationId: redactSensitiveText
+      tags:
+        - Moderation
+      security:
+        - bearer_auth: []
+      parameters:
+        - $ref: "#/paths/~1api~1chat/post/parameters/0"
+      description: Redact sensitive information from given text.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+              required:
+                - text
+            example:
+              text: Hello everyone! Anyone here familiar with the new Node.js update? Could
+                you email me at james(at)squarecat.io if you know anything? Or
+                you can phone me 082-34234-44
+      responses:
+        "200":
+          description: Redaction result with usage information.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      redactions:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum:
+                                - email_address
+                                - phone_number
+                                - name
+                                - keyword
+                                - custom
+                            text:
+                              type: string
+                            confidence:
+                              type: integer
+                              format: int32
+                              minimum: 0
+                              maximum: 100
+                              description: Confidence score of the redaction as a percentage.
+                      redactedText:
+                        type: string
+                        description: Text after applying redactions with placeholders for redacted
+                          content.
+                    example:
+                      redactedText: Hello everyone! Anyone here familiar with the new Node.js update?
+                        Could you email me at [email_redacted] if you know
+                        anything? Or you can phone me at [phone_redacted]
+                      redactions:
+                        - type: email_address
+                          text: james(at)squarecat.io
+                          confidence: 95
+                        - type: phone_number
+                          text: 082-34234-44
+                          confidence: 90
+                  usage:
+                    $ref: "#/paths/~1api~1moderation~1sentiment/post/responses/200/content/applicat\
+                      ion~1json/schema/properties/usage"
+        "400":
+          description: Bad request, text is required
+        "401":
+          description: Unauthorized, user not authenticated.
+        "500":
+          description: An error occurred.
+  /api/embeddings/file:
+    post:
+      summary: Embed a file
+      operationId: embedFile
+      description: >-
+        Upload a file to the embeddings database. Text will be extracted from
+        the file,
+
+        split into chunks, converted to embeddings, and inserted into the embeddings
+
+        database.
+      tags:
+        - Embeddings
+      security:
+        - bearer_auth: []
+      parameters:
+        - $ref: "#/paths/~1api~1chat/post/parameters/0"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: File to be uploaded.
+                  enum:
+                    - pdf
+                    - txt
+                    - docx
+                    - csv
+      responses:
+        "200":
+          description: File uploaded successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: File uploaded successfully!
+                  contextId:
+                    type: string
+                    description: The reference identifier for the uploaded file.
+                  usage:
+                    $ref: "#/paths/~1api~1moderation~1sentiment/post/responses/200/content/applicat\
+                      ion~1json/schema/properties/usage"
+        "400":
+          description: Bad request, no file provided or file type not supported.
+        "500":
+          description: An error occured.
+  /api/embeddings/csv:
+    post:
+      summary: Upload data from CSV
+      operationId: embedCsv
+      description: |
+        Work in progress
+      tags:
+        - Embeddings
+      security:
+        - bearer_auth: []
+      parameters:
+        - $ref: "#/paths/~1api~1chat/post/parameters/0"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: CSV file to be uploaded.
+      responses:
+        "200":
+          description: CSV file processing to be implemented.
+        "400":
+          description: Bad request, no file provided or file type not supported.
+        "500":
+          description: An error occured.
+  /api/embeddings/urls:
+    post:
+      summary: Upload documents via URL
+      operationId: embedUrls
+      description: >-
+        This endpoint allows you to specify multiple URLs. The document at each
+        of the URLs will
+
+        be fetched, split and upserted into the embeddings database.
+
+
+        A Context ID will be returned which can be used by the Chat API. If multiple documents
+
+        are provided they will all have the same Context ID
+      tags:
+        - Embeddings
+      security:
+        - bearer_auth: []
+      parameters:
+        - $ref: "#/paths/~1api~1chat/post/parameters/0"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userUuid:
+                  type: string
+                  format: uuid
+                  description: UUID of the user to associate the uploads with.
+                urls:
+                  type: array
+                  items:
+                    type: string
+                    format: uri
+                  description: An array of URLs pointing to the files to be uploaded.
+                contextId:
+                  type: string
+                  description: An identifier for the upload context or session.
+                namespace:
+                  type: string
+                  description: A categorization or grouping label for the uploads.
+              required:
+                - userUuid
+                - urls
+      responses:
+        "200":
+          description: Files are being uploaded and processed. Stream of updates is sent
+            as response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  percentage:
+                    type: number
+                    format: float
+                    description: The percentage of files processed at the point of update.
+                  documentId:
+                    type: string
+                    description: The unique identifier for the document that has just been
+                      processed.
+        "400":
+          description: Bad request, user UUID or array of image urls not provided
+        "500":
+          description: An error occured.
+  /api/images/create:
+    post:
+      summary: Create an image
+      operationId: createImage
+      tags:
+        - Images
+      security:
+        - bearer_auth: []
+      description: Create an image based on a prompt using `DALL-E` models.
+      parameters:
+        - $ref: "#/paths/~1api~1chat/post/parameters/0"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - prompt
+              properties:
+                prompt:
+                  type: string
+                  description: Prompt describing the desired image.
+                  example: An image of an alient squid in space, swimming around the Starship
+                    Enterprise D
+      responses:
+        "200":
+          description: Image and usage information.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  images:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        url:
+                          type: string
+                          description: The URL of the created image
+                          example: https://sfo3.digitaloceanspaces.com/startkitai/494226b2-1059-4957-982a-f785b29b57e5/generated-images/f590287b-7ed1-4ddf-acfc-a76539c56202.png
+                        revised_prompt:
+                          type: string
+                          description: DALL-E will rephrase your original prompt to improve it
+                          example: A visual representation of a celestial alien squid-like creature,
+                            gliding effortlessly in the vastness of outer space.
+                            It is navigating fluidly around an advanced, large,
+                            multi-decked spaceship, exuding a futuristic
+                            architectural design akin to the 24th-century star
+                            fleet aesthetic.
+                    description: List of created images.
+                  usage:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        model:
+                          type: string
+                        size:
+                          type: string
+                          enum:
+                            - 1024x1024
+                            - 512x512
+                        quality:
+                          type: string
+                        cost:
+                          type: number
+                          format: float
+                      example:
+                        model: dall-e-2
+                        size: 1024x1024
+                        quality: standard
+                        cost: 0.02
+        "400":
+          description: Bad request, prompt is required
+        "401":
+          description: Unauthorized, user not authenticated.
+        "500":
+          description: An error occured
+  /api/images/detect:
+    post:
+      summary: Analyse an image
+      operationId: detectImage
+      tags:
+        - Images
+      description: Pass an image to `GPT-4-Vision` for identification.
+      security:
+        - bearer_auth: []
+      parameters:
+        - $ref: "#/paths/~1api~1chat/post/parameters/0"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - image
+                - prompt
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: Image file to be analyzed.
+                prompt:
+                  type: string
+                  description: Optional prompt to guide detection.
+                  example: What kind of fish is in this image?
+      responses:
+        "200":
+          description: The API will respond with a description of the image in the
+            `result` property.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    description: The analysis of of the image
+                    example: The fish in the image are Longfin Bannerfish, also known scientifically
+                      as Heniochus acuminatus. They are identifiable by their
+                      distinctive black, white, and yellow banding, as well as
+                      the elongated white dorsal fin.
+                  usage:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        model:
+                          type: string
+                        size:
+                          type: string
+                          enum:
+                            - 1024x1024
+                            - 512x512
+                        quality:
+                          type: string
+                        cost:
+                          type: number
+                          format: float
+                      example:
+                        model: dall-e-2
+                        size: 1024x1024
+                        quality: standard
+                        cost: 0.02
+        "400":
+          description: Bad request, image and prompt are required
+        "401":
+          description: Unauthorized, user not authenticated.
+        "500":
+          description: An error occured
+  /api/images/variation:
+    post:
+      summary: Create image variations
+      operationId: createImageVariations
+      tags:
+        - Images
+      security:
+        - bearer_auth: []
+      parameters:
+        - $ref: "#/paths/~1api~1chat/post/parameters/0"
+      description: Create variations of a passed in image using `DALL-E` models.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - image
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: Original image for creating variations.
+      responses:
+        "200":
+          description: Variations created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  images:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        url:
+                          type: string
+                          description: The URL of the created image
+                          example: https://sfo3.digitaloceanspaces.com/startkitai/494226b2-1059-4957-982a-f785b29b57e5/generated-images/f590287b-7ed1-4ddf-acfc-a76539c56202.png
+                    description: List of created images.
+                  usage:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        model:
+                          type: string
+                        size:
+                          type: string
+                          enum:
+                            - 1024x1024
+                            - 512x512
+                        quality:
+                          type: string
+                        cost:
+                          type: number
+                          format: float
+                      example:
+                        model: dall-e-2
+                        size: 1024x1024
+                        quality: standard
+                        cost: 0.02
+        "400":
+          description: Bad request, image is required
+        "401":
+          description: Unauthorized, user not authenticated.
+        "500":
+          description: An error occured
+  /api/images/inpainting:
+    post:
+      summary: Perform inpainting
+      operationId: imageInpainting
+      description: >-
+        Inpaintings are for changing something within an image.
+
+
+        It's very effective at removing something from an image for example.
+
+
+
+        The endpoint accepts the image to change, a mask, and a prompt.
+
+
+        ### Mask
+
+        A mask indicates which areas of the image should be replaced.
+
+
+        ### Prompt
+
+        The prompt should describe the full new image, not just the erased area.
+
+
+        See OpenAI docs for [more info](https://platform.openai.com/docs/guides/images/edits-dall-e-2-only).
+      security:
+        - bearer_auth: []
+      parameters:
+        - $ref: "#/paths/~1api~1chat/post/parameters/0"
+      tags:
+        - Images
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - image
+                - prompt
+                - mask
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: Original image
+                mask:
+                  type: string
+                  format: binary
+                  description: A mask indicating which areas should be replaced
+                prompt:
+                  type: string
+                  description: The prompt should describe the **full new image**, not just the
+                    erased area.
+      responses:
+        "200":
+          description: Images generated from the original image and mask
+          content:
+            application/json:
+              schema:
+                $ref: "#/paths/~1api~1images~1variation/post/responses/200/content/application~\
+                  1json/schema"
+        "400":
+          description: Bad request, image, mask, and promp are required
+        "401":
+          description: Unauthorized, user not authenticated.
+        "500":
+          description: An error occured
+  /api/images/outpainting:
+    post:
+      summary: Perform outpainting
+      operationId: imageOutpainting
+      description: >-
+        Outpainting is for continuing an image beyond its original borders.
+
+
+        Visual elements are added in the same style, or new directions by using a
+
+        natural language description prompt
+
+
+        See OpenAIs announcement for [more info](https://openai.com/blog/dall-e-introducing-outpainting).
+      security:
+        - bearer_auth: []
+      parameters:
+        - $ref: "#/paths/~1api~1chat/post/parameters/0"
+      tags:
+        - Images
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - image
+                - prompt
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: Original image for creating outpainting
+                prompt:
+                  type: string
+                  description: Prompt to guide the outpainting
+      responses:
+        "200":
+          description: The outpainted images
+          content:
+            application/json:
+              schema:
+                $ref: "#/paths/~1api~1images~1variation/post/responses/200/content/application~\
+                  1json/schema"
+        "400":
+          description: Bad request, image and prompt required
+        "401":
+          description: Unauthorized, user not authenticated.
+        "500":
+          description: An error occured
+  /api/speech/from-text:
+    post:
+      summary: Create speech from text
+      operationId: createSpeechFromText
+      tags:
+        - Speech
+      security:
+        - bearer_auth: []
+      parameters:
+        - $ref: "#/paths/~1api~1chat/post/parameters/0"
+      description: Create speech from text
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+            example:
+              text: Seize the time... Live now! Make now always the most precious time. Now
+                will never come again. -  Captain Jean-Luc Picard
+      responses:
+        "200":
+          description: Returns an audio file
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+            audio/opus:
+              schema:
+                type: string
+                format: binary
+            audio/aac:
+              schema:
+                type: string
+                format: binary
+            audio/flac:
+              schema:
+                type: string
+                format: binary
+            audio/wav:
+              schema:
+                type: string
+                format: binary
+            audio/pcm:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Bad request, text is required
+        "401":
+          description: Unauthorized, user not authenticated.
+        "500":
+          description: An error occured
+  /api/speech/translate/from-audio:
+    post:
+      summary: Translate audio to English
+      operationId: translateAudio
+      tags:
+        - Speech
+      description: Accepts an audio file and translates its content to the audio in
+        the specified language.
+      security:
+        - bearer_auth: []
+      parameters:
+        - $ref: "#/paths/~1api~1chat/post/parameters/0"
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - audio
+              properties:
+                audio:
+                  type: string
+                  format: binary
+                  description: The audio file to be translated.
+                prompt:
+                  type: string
+                  description: Additional prompt to guide the translation.
+                  example: Translate this conversation to simple English from French
+                language:
+                  type: string
+                  description: Language code for the language of the audio file.
+                  example: fr
+      responses:
+        "200":
+          description: A translated audio file.
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+            audio/opus:
+              schema:
+                type: string
+                format: binary
+            audio/aac:
+              schema:
+                type: string
+                format: binary
+            audio/flac:
+              schema:
+                type: string
+                format: binary
+            audio/wav:
+              schema:
+                type: string
+                format: binary
+            audio/pcm:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Bad request, audio file is required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: File named 'audio' is required
+        "401":
+          description: Unauthorized, user not authenticated.
+        "500":
+          description: An error occured
+  /api/speech/transcribe:
+    post:
+      summary: Transcribe audio content
+      operationId: transcribeAudio
+      description: Accepts an audio file, transcribes its content, and returns the
+        transcription along with usage data.
+      security:
+        - bearer_auth: []
+      parameters:
+        - $ref: "#/paths/~1api~1chat/post/parameters/0"
+      tags:
+        - Speech
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - audio
+              properties:
+                audio:
+                  type: string
+                  format: binary
+                  description: The audio file to be transcribed.
+                language:
+                  type: string
+                  description: Optional language code of the audio content.
+                  example: fr
+                prompt:
+                  type: string
+                  description: Optional prompt to guide the transcription.
+      responses:
+        "200":
+          description: Successfully transcribed audio content.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transcription:
+                    type: object
+                    properties:
+                      text:
+                        type: string
+                        description: The textual transcription of the audio file.
+                        example: Hello, this is an example of transcribed audio.
+                      segments:
+                        type: array
+                        example: []
+                  usage:
+                    type: object
+                    description: Usage data related to the transcription request.
+                    properties:
+                      model:
+                        type: string
+                        description: The model used for the transcription
+                        example: whisper-1
+                      audioFileDurationSeconds:
+                        type: integer
+                        description: The duration of the transcribed audio
+                        example: 18
+                      cost:
+                        type: number
+                        description: Cost of the transcription
+                        example: 0.05
+        "400":
+          description: Bad request, audio file is required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: File named 'audio' is required
+        "401":
+          description: Unauthorized, user not authenticated.
+        "500":
+          description: An error occured
+  /api/detect/file:
+    post:
+      summary: Detect if a file is AI generated
+      operationId: detectFile
+      description: >-
+        Uses the ContentCredentials manifest to check to see if an image was
+        created by AI
+
+
+        Note: Absence of ContentCredentials metadata doesn't mean that the image was not AI generated, as the metadata could be removed or never added
+      tags:
+        - Detect
+      security:
+        - bearer_auth: []
+      parameters:
+        - $ref: "#/paths/~1api~1chat/post/parameters/0"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: File to be analyzed.
+              required:
+                - file
+      responses:
+        "200":
+          description: The API will respond with `verifiedAIGenerated` and the
+            ContentCredentials output in the `result` property.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verifiedAIGenerated:
+                    type: string
+                    enum:
+                      - yes
+                      - no
+                      - unconfirmed
+                  result:
+                    type: object
+                    description: The ContentCredentials output
+                    example:
+                      activeManifest: <ContentCredentials output>
+                      manifestChain: <ContentCredentials output>
+                      validationStatus: <ContentCredentials output>
+        "400":
+          description: Bad request, file is required
+        "401":
+          description: Unauthorized, user not authenticated.
+        "500":
+          description: An error occurred.
+components:
+  securitySchemes:
+    bearer_auth:
+      type: http
+      scheme: bearer
+      description: This request requires a license key to be included in the
+        Authorization header of the request.

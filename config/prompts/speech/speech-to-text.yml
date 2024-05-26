@@ -1,0 +1,14 @@
+models:
+  - whisper-1
+
+# An optional text to guide the model's style or continue a previous audio segment.
+# The prompt should match the audio language.
+prompt:
+
+options:
+  # json, text, srt, verbose_json, or vtt.
+  response_format: verbose_json
+  temperature: 0.7
+  # word or segment
+  # can only be used if response_format is set to verbose_json
+  timestamp_granularities: segment

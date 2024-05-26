@@ -1,0 +1,73 @@
+summary: Translate audio to English
+operationId: translateAudio
+tags:
+  - Speech
+description: Accepts an audio file and translates its content to the audio in the specified language.
+security:
+  - bearer_auth: []
+
+parameters:
+  - $ref: ../common/authorization-parameters.yml#/AuthorizationHeader
+
+requestBody:
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        required:
+          - audio
+        properties:
+          audio:
+            type: string
+            format: binary
+            description: The audio file to be translated.
+          prompt:
+            type: string
+            description: Additional prompt to guide the translation.
+            example: 'Translate this conversation to simple English from French'
+          language:
+            type: string
+            description: Language code for the language of the audio file.
+            example: 'fr'
+responses:
+  '200':
+    description: A translated audio file.
+    content:
+      audio/mpeg:
+        schema:
+          type: string
+          format: binary
+      audio/opus:
+        schema:
+          type: string
+          format: binary
+      audio/aac:
+        schema:
+          type: string
+          format: binary
+      audio/flac:
+        schema:
+          type: string
+          format: binary
+      audio/wav:
+        schema:
+          type: string
+          format: binary
+      audio/pcm:
+        schema:
+          type: string
+          format: binary
+  '400':
+    description: Bad request, audio file is required
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              description: File named 'audio' is required
+  '401':
+    description: Unauthorized, user not authenticated.
+  '500':
+    description: An error occured

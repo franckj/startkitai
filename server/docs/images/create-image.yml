@@ -1,0 +1,41 @@
+summary: Create an image
+operationId: createImage
+
+tags:
+  - Images
+
+security:
+  - bearer_auth: []
+
+description: Create an image based on a prompt using `DALL-E` models.
+
+parameters:
+  - $ref: ../common/authorization-parameters.yml#/AuthorizationHeader
+
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - prompt
+        properties:
+          prompt:
+            type: string
+            description: Prompt describing the desired image.
+            example: An image of an alient squid in space, swimming around the Starship Enterprise D
+
+responses:
+  '200':
+    description: Image and usage information.
+    content:
+      application/json:
+        schema:
+          $ref: '../common/image-response.yml#/ImageRevisionResponse'
+  '400':
+    description: Bad request, prompt is required
+  '401':
+    description: Unauthorized, user not authenticated.
+  '500':
+    description: An error occured

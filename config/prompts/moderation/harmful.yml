@@ -1,0 +1,20 @@
+models:
+  - text-moderation-latest
+# OpenAI recommends that you split your request into
+# chunks of less than 2000 characters, this happens
+# for you automatically
+chunk_size: 2000
+# if you don't need a category then remove it from
+# this list and it will be ignored
+categories:
+  - sexual
+  - hate
+  - harassment
+  - self-harm
+  - sexual/minors
+  - hate/threatening
+  - violence/graphic
+  - self-harm/intent
+  - self-harm/instructions
+  - harassment/threatening
+  - violence

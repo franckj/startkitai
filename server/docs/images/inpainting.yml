@@ -1,0 +1,61 @@
+summary: Perform inpainting
+operationId: imageInpainting
+description: |-
+  Inpaintings are for changing something within an image.
+
+  It's very effective at removing something from an image for example.
+
+
+  The endpoint accepts the image to change, a mask, and a prompt.
+
+  ### Mask
+  A mask indicates which areas of the image should be replaced.
+
+  ### Prompt
+  The prompt should describe the full new image, not just the erased area.
+
+  See OpenAI docs for [more info](https://platform.openai.com/docs/guides/images/edits-dall-e-2-only).
+
+security:
+  - bearer_auth: []
+
+parameters:
+  - $ref: ../common/authorization-parameters.yml#/AuthorizationHeader
+
+tags:
+  - Images
+requestBody:
+  required: true
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        required:
+          - image
+          - prompt
+          - mask
+        properties:
+          image:
+            type: string
+            format: binary
+            description: Original image
+          mask:
+            type: string
+            format: binary
+            description: A mask indicating which areas should be replaced
+          prompt:
+            type: string
+            description: The prompt should describe the **full new image**, not just the erased area.
+responses:
+  '200':
+    description: Images generated from the original image and mask
+    content:
+      application/json:
+        schema:
+          $ref: '../common/image-response.yml#/ImageResponse'
+  '400':
+    description: Bad request, image, mask, and promp are required
+  '401':
+    description: Unauthorized, user not authenticated.
+  '500':
+    description: An error occured

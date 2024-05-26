@@ -1,0 +1,48 @@
+summary: Perform outpainting
+operationId: imageOutpainting
+description: |-
+  Outpainting is for continuing an image beyond its original borders.
+
+  Visual elements are added in the same style, or new directions by using a
+  natural language description prompt
+
+  See OpenAIs announcement for [more info](https://openai.com/blog/dall-e-introducing-outpainting).
+
+security:
+  - bearer_auth: []
+
+parameters:
+  - $ref: ../common/authorization-parameters.yml#/AuthorizationHeader
+
+tags:
+  - Images
+requestBody:
+  required: true
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        required:
+          - image
+          - prompt
+        properties:
+          image:
+            type: string
+            format: binary
+            description: Original image for creating outpainting
+          prompt:
+            type: string
+            description: Prompt to guide the outpainting
+responses:
+  '200':
+    description: The outpainted images
+    content:
+      application/json:
+        schema:
+          $ref: '../common/image-response.yml#/ImageResponse'
+  '400':
+    description: Bad request, image and prompt required
+  '401':
+    description: Unauthorized, user not authenticated.
+  '500':
+    description: An error occured

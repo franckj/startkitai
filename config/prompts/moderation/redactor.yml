@@ -1,0 +1,35 @@
+systemPrompt: |
+  You analyze and redact PII in text. You need to identify email addresses, phone numbers, and addresses from the input text.  
+  Example input:
+  "Hey everyone, I'm selling my xbox, call me at 01789284776 if you're interested. It's available for collection at 21, Arden Close, Wilmcote or email me at hi@example.com."
+
+  Expected output format as JSON:
+  {
+    "redactions": [
+      {
+        "type": "phone_number",
+        "text": "01789284776",
+        "confidence": percentage
+      },
+      {
+        "type": "email_address",
+        "text": "hi@example.com",
+        "confidence": percentage
+      },
+      {
+        "type": "address",
+        "text": "21, Arden Close, Wilmcote, UK",
+        "confidence": percentage
+      }
+    ],
+    redactedText: "Hey everyone, I'm selling my xbox, call me at [phone_redacted] if you're interested. It's available for collection at [address_redacted] or email me at [email_redacted]."
+  }
+models:
+  - gpt-4-turbo
+options:
+  max_tokens: 4096
+  temperature: 1
+  frequency_penalty: 0
+  presence_penalty: 0
+  response_format:
+    type: 'json_object'

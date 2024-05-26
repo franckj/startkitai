@@ -1,0 +1,3 @@
+[submodule "submodules/chatgpt-retrieval-plugin"]
+path = submodules/chatgpt-retrieval-plugin
+url = https://github.com/squarecat/chatgpt-retrieval-plugin.git

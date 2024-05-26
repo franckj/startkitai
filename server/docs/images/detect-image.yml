@@ -1,0 +1,72 @@
+summary: Analyse an image
+operationId: detectImage
+tags:
+  - Images
+description: Pass an image to `GPT-4-Vision` for identification.
+
+security:
+  - bearer_auth: []
+
+parameters:
+  - $ref: ../common/authorization-parameters.yml#/AuthorizationHeader
+
+requestBody:
+  required: true
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        required:
+          - image
+          - prompt
+        properties:
+          image:
+            type: string
+            format: binary
+            description: Image file to be analyzed.
+          prompt:
+            type: string
+            description: Optional prompt to guide detection.
+            example: What kind of fish is in this image?
+
+responses:
+  '200':
+    description: The API will respond with a description of the image in the `result` property.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            result:
+              type: string
+              description: The analysis of of the image
+              example: The fish in the image are Longfin Bannerfish, also known scientifically as Heniochus acuminatus. They are identifiable by their distinctive black, white, and yellow banding, as well as the elongated white dorsal fin.
+
+            usage:
+              type: array
+              items:
+                type: object
+                properties:
+                  model:
+                    type: string
+                  size:
+                    type: string
+                    enum:
+                      - 1024x1024
+                      - 512x512
+                  quality:
+                    type: string
+                  cost:
+                    type: number
+                    format: float
+                example:
+                  model: 'dall-e-2'
+                  size: '1024x1024'
+                  quality: standard
+                  cost: 0.02
+  '400':
+    description: Bad request, image and prompt are required
+  '401':
+    description: Unauthorized, user not authenticated.
+  '500':
+    description: An error occured

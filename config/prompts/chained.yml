@@ -1,0 +1,45 @@
+# An example set of prompts for creating long form content
+# This is what's used in our BlogPost Demo
+steps:
+  - name: Summarize
+    model: gpt-4-turbo
+    systemPrompt: |
+      You summarize text into its important parts. The text might be from a website or document.
+      These parts will be given a source for an LLM to write a piece of long-form content, not read by a human, so no need to make it formatted nicely.
+      Remember you are not creating the long-form content, just summarizing it for later.
+      The resulting long form content will be created with the following prompt, so focus on these areas for your summarization:
+      "{postPrompt}"
+    outputs:
+      - sumaries
+  - name: Outline
+    model: gpt-4-turbo
+    systemPrompt: |
+      You will be given summaries of text articles, your job is to create an outline of a long-form text post (like a blog post) that will be created using this outline.
+      These parts will be given a source for an LLM to write a piece of long-form content, not read by a human, so no need to make it formatted nicely.
+      Remember you are not creating the long-form content, just creating an outline for later.
+      The resulting long form content will be created with the following prompt, so focus on these areas for your outline:
+      "{postPrompt}"
+    outputs:
+      - sumaries
+      - outline
+  # TODO step to create images for the blog post?
+  - name: Create
+    model: gpt-4-turbo
+    options:
+      max_tokens: 4000
+      temperature: 0.7
+      frequency_penalty: 0
+      presence_penalty: 0
+    systemPrompt: |
+      You are an expert blogger, you will be provided with an outline for a long-form blog post as well as a set of general instructions on what kind of post to create.
+      Write your post in Markdown.
+      Make sure you include your sources at the end, with references to them throughout if required.
+    userPrompt: |
+      Here's a description from your manager of the blog post you need to write:
+      {prompt}
+
+      Here's some summarized background info from your researcher:
+      {sources}
+
+      Here's an outline of the blog post from your researcher:
+      {outline}

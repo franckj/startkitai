@@ -1,0 +1,56 @@
+summary: Detect if a file is AI generated
+operationId: detectFile
+description: |-
+  Uses the ContentCredentials manifest to check to see if an image was created by AI
+
+  Note: Absence of ContentCredentials metadata doesn't mean that the image was not AI generated, as the metadata could be removed or never added
+
+tags:
+  - Detect
+
+security:
+  - bearer_auth: []
+
+parameters:
+  - $ref: ../common/authorization-parameters.yml#/AuthorizationHeader
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          image:
+            type: string
+            format: binary
+            description: File to be analyzed.
+        required:
+          - file
+responses:
+  '200':
+    description: The API will respond with `verifiedAIGenerated` and the ContentCredentials output in the `result` property.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            verifiedAIGenerated:
+              type: string
+              enum:
+                - yes
+                - no
+                - unconfirmed
+            result:
+              type: object
+              description: The ContentCredentials output
+              example:
+                activeManifest: <ContentCredentials output>
+                manifestChain: <ContentCredentials output>
+                validationStatus: <ContentCredentials output>
+
+  '400':
+    description: Bad request, file is required
+  '401':
+    description: Unauthorized, user not authenticated.
+  '500':
+    description: An error occurred.

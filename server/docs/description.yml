@@ -1,0 +1,225 @@
+introduction: |
+  # Introduction
+
+  The StartKit.AI API allows you to create a starting point for your AI project
+  very quickly.
+
+  It's emphasis is on simplicity, so we've tried to make the API as easy as possible
+  to get started with.
+
+  All OpenAI API endpoints that result in a query to their LLM models are supported.
+  But the APIs that do account level things such as creating assistants or fine-tunes
+  are not implemented, as we either consider them not useful, or replaced by other
+  StartKit.AI functionality.
+
+
+  ## Endpoints
+
+  Our AI endpoints range from simple to complex wrappers around OpenAI's API
+  functionality.
+
+  They give you all the things that are missing when trying to build a SaaS AI app.
+
+  These API pages give you details of the arguments and details needed to call
+  the API. Descriptions of how the endpoints work and their justifications can be
+  found with the [main website documentation here](https://startkit.ai/docs).
+
+  ### [Chat](#tag/Chat)
+
+  The main functionality for most AI applications, our Chat endpoints gives you total
+  control when allowing your customers to comminicate with a LLM.
+
+  - Saves chat history to the database to build longer and smarter context windows
+  - Hooks into pre-stored embeddings via context IDs.
+  - Uploads and stores created images
+  - Fetches files and webpages automatically
+
+  See our [Chat Documentation for more info on how Chat works](https://startkit.ai/docs/api/chat).
+
+  Or the API reference [here](#tag/Chat).
+
+  ### [Images](#tag/Images)
+
+  The Images API allows you to access DALL-E models for creating and modifying images.
+
+  - Creating images
+  - Analyzing images (Vision)
+  - Create variations on an image
+  - Perform inpainting
+  - Perform outpainting
+
+  See our [Images Documentation for more info on how Images works](https://startkit.ai/docs/api/images).
+
+  Or the API reference [here](#tag/Images).
+
+  ### [Moderation](#tag/Moderation)
+
+  The Moderation API allows you to use OpenAIs harmful text API, and some of our own custom moderation functions:
+
+  - Checking if text is harmful and in what harmful category it falls into
+  - Analyzing sentiment
+  - Redacting personal information
+
+  See our [Moderation Documentation for more info on how Moderation works](https://startkit.ai/docs/api/moderation).
+
+  Or the API reference [here](#tag/Moderation).
+
+  ### [Speech](#tag/Speech)
+
+  The Speech API gives you access to TTS and Whisper models for performing speech-to-text (STT) and text-to-speech (TTS) allowing the following:
+
+  - Creating audio from text (TTS)
+  - Transcribing audio to text (STT)
+  - Translating non-English audio to English text
+  - Converting non-English audio to English audio
+
+  See our [Speech Documentation for more info on how Speech works](https://startkit.ai/docs/api/speech).
+
+  Or the API reference [here](#tag/Speech).
+
+  ### [Embeddings](#tag/Embeddings)
+
+  Our embeddings API lets you easily send arbitrary data to Pinecone to be vectorized, including:
+
+  - Text snippets
+  - Text files (.docx, .txt, .pdf, .csv)
+  - Multiple files via URL
+  - Crawl URLs and embed the text of a webpage (todo)
+
+  See our [Embeddings Documentation for more info on how Embeddings works](https://startkit.ai/docs/api/embeddings).
+
+  Or the API reference [here](#tag/Embeddings).
+
+  ### [Detect](#tag/Detect)
+
+  Our Detect API lets you detect if a piece of content is AI generated or not.
+
+  - Files/images
+
+  See our [Detect Documentation for more info on how Detect works](https://startkit.ai/docs/api/detect).
+
+  Or the API reference [here](#tag/Detect).
+
+  ## Requests
+
+  All requests are made over HTTP(S) using REST.
+
+  Some requests are responded to with Server Sent Events (SSE), for easy streaming.
+
+
+  ## Authentication
+
+  The API is secured by License Keys. When a user is created or signs up for your app, they are issued a license key automatically.
+
+  This license key can be used to make requests to the API as a Bearer Token in the Authorization header.
+
+  ```http
+  Authorization: Bearer sk_c8fcb59d-fad2-467c-b25e-dc4739d82785
+  ```
+
+  **Note:** In our demos, the users' license key is saved to localStorage when they finish signing in and all requests to the API get the key from localStorage and add it to the request.
+
+  Here's an example of making an API request with the license key as a Bearer token from our demos:
+
+  ```javascript
+    const licenseKey = localStorage.getItem('licenseKey');
+
+    const response = await fetch('/api/images/create', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${licenseKey}`
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        prompt: 'Make an image of the Starship Enterprise orbiting an alien planet'
+      })
+    });
+  ```
+
+  You can read more about how authentication and users are managed in the [product docs](https://startkit.ai/docs/features/users).
+
+  ## HTTP Statuses
+
+  Along with the HTTP methods that the API responds to, it will also return
+  standard HTTP statuses, including error codes.
+
+  In the event of a problem, the status will contain the error code, while the
+  body of the response will usually contain additional information about the
+  problem that was encountered.
+
+  In general, if the status returned is in the 200 range, it indicates that
+  the request was fulfilled successfully and that no error was encountered.
+
+  Return codes in the 400 range typically indicate that there was an issue
+  with the request that was sent. Among other things, this could mean that you
+  did not authenticate correctly, that you are requesting an action that you
+  do not have authorization for, that the object you are requesting does not
+  exist, or that your request is malformed.
+
+  If you receive a status in the 500 range, this generally indicates a
+  server-side problem.
+
+  400 and 500 level error responses will include a JSON object in their body,
+  including the following attributes:
+
+  |Name|Type|Description|
+  |--- |--- |--- |
+  |code|string|A short identifier corresponding to the HTTP status code returned. For example, the code for a response returning a 404 status code would be "not_found."|
+  |message|string|A message providing additional information about the error, including details to help resolve it when possible.|
+
+  ### Example Error Response
+
+  ```http
+  HTTP/1.1 403 Forbidden
+  {
+    "code":     "forbidden",
+    "message":  "A license key is required to access this resource."
+  }
+  ```
+
+  ## Usage
+
+  A request that causes a call to OpenAIs API will always return a `usage` property on the
+  response (with the exception of the /api/moderaton/harmful endpoint, which is free).
+  This will represent the number of tokens used in the AI request, and the total `cost`
+  of that request.
+
+  The cost is always in USD.
+
+
+  ### Sample response with usage
+  ```json
+    {
+      "result": {
+        "sentiment": "neutral",
+        "confidence": 100
+      },
+      "usage": [
+        {
+          "model": "gpt-4-turbo",
+          "promptTokens": 53,
+          "completionTokens": 17,
+          "cost": 0.0010400000000000001
+        }
+      ]
+    }
+  ```
+
+  ### Sample image response with usage
+
+  ```json
+  {
+    "images": [{
+      "revisedPrompt": "A dazzling scene unfolds underwater. The star of the show is a magnificent fish. It's a stunning fusion of colors, with shimmering scales that reflect a kaleidoscope of hues: vibrant blues, iridescent greens, rich purples and a touch of gold.",
+      "url": "https://sfo3.digitaloceanspaces.com/startkitai/494226b2-1059-4957-982a-f785b29b57e5/generated-images/4f7c8202-88d7-4840-881b-027351a2d6d1.png"
+    }],
+    "usage": [
+      {
+        "model": "dall-e-3",
+        "size": "1024x1024",
+        "quality": "standard",
+        "cost": 0.04
+      }
+    ]
+  }
+  ```

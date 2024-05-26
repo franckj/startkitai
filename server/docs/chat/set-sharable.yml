@@ -1,0 +1,40 @@
+summary: Mark chat as sharable
+operationId: markChatSharable
+description: Updates the chat history to mark it as sharable or not based on the provided flag.
+tags:
+  - Chat
+
+security:
+  - bearer_auth: []
+
+parameters:
+  - $ref: ../common/authorization-parameters.yml#/AuthorizationHeader
+  - in: path
+    name: uuid
+    required: true
+    schema:
+      type: string
+    description: The UUID of the chat to update the sharability status.
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          isSharable:
+            type: boolean
+            description: Flag indicating whether the chat history should be marked as sharable.
+        required:
+          - isSharable
+responses:
+  '201':
+    description: Chat history marked as sharable successfully.
+  '400':
+    description: Bad request, invalid input provided.
+  '401':
+    description: Unauthorized, user not authenticated.
+  '404':
+    description: Not found, chat with the given UUID does not exist.
+  '500':
+    description: Internal server error.

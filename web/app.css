@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#root {
+	min-height: 100vh;
+}
+
+.submit-icon {
+	position: absolute;
+	right: 25px;
+	bottom: 22px;
+}
+.chat-start {
+	display: flex;
+	flex-direction: column;
+}
+.chat-end {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+}
+.empty\:hidden:empty {
+	display: none;
+}
+
+.meta-tool {
+	padding: 4px 10px;
+	opacity: 0.5;
+}
+
+body {
+	background-color: '#f4f4f4';
+}
+
+p code {
+	background-color: #2d2d2d;
+	color: #f9f2f4;
+	padding: 2px 4px; /* Adds some padding inside the code block */
+	border-radius: 4px; /* Rounds the corners for a smoother look */
+	font-family: monospace; /* Ensures the code has a consistent, readable font */
+}
+
+pre[class*='language-'] {
+	border-radius: 4px;
+	padding: 0.5em 1em !important;
+}
+code[class*='language-'] {
+	font-size: 70% !important;
+}
+
+.md ul,
+.md ol {
+	@apply pl-5;
+	@apply pt-2;
+	@apply mt-2;
+}
+
+.md ul li,
+.md ol li {
+	@apply mb-2;
+}
+
+.md ol {
+	@apply list-decimal;
+}
+
+.md ul {
+	@apply list-disc;
+}
+
+.card-body {
+	padding: 1em;
+	min-height: 170px;
+}
+
+.prose {
+	line-height: 1.4;
+}
+
+.prose ul,
+.prose ol {
+	margin-top: 0;
+	padding-top: 0;
+}
+
+.prose p {
+	margin-top: 0.3em;
+	margin-bottom: 0.4em;
+}
+
+[data-theme='light'] .prose,
+[data-theme='light'] .prose a {
+	color: #d8dde3;
+}
+
+[data-theme='light'] li::marker {
+	color: #919497;
+}
+
+.tooltip:before {
+}

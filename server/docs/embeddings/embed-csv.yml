@@ -1,0 +1,31 @@
+summary: Upload data from CSV
+operationId: embedCsv
+description: >
+  Work in progress
+tags:
+  - Embeddings
+security:
+  - bearer_auth: []
+
+parameters:
+  - $ref: ../common/authorization-parameters.yml#/AuthorizationHeader
+
+requestBody:
+  required: true
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        properties:
+          file:
+            type: string
+            format: binary
+            description: CSV file to be uploaded.
+
+responses:
+  '200':
+    description: CSV file processing to be implemented.
+  '400':
+    description: Bad request, no file provided or file type not supported.
+  '500':
+    description: An error occured.

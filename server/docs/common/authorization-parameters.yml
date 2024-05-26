@@ -1,0 +1,8 @@
+AuthorizationHeader:
+  in: header
+  name: Authorization
+  required: true
+  schema:
+    type: string
+    example: 'Bearer sk_test_e2ebe714-2d21-4cbd-895e-a8ae3ecc4462'
+  description: This request requires a license key to be included in the Authorization header of the request.

@@ -1,0 +1,109 @@
+spec:
+  name: startkit-ai-sample
+  region: nyc
+  alerts:
+    - rule: DEPLOYMENT_FAILED
+    - rule: DOMAIN_FAILED
+
+  features:
+    - 'buildpack-stack=ubuntu-22'
+
+  ingress:
+    rules:
+      - component:
+          name: api
+        match:
+          path:
+            prefix: /
+      - component:
+          name: memory
+        match:
+          path:
+            prefix: /memory
+
+  services:
+    - name: api
+      github:
+        branch: main
+        repo: startkit-ai/startkit.ai
+      dockerfile_path: Dockerfile
+      http_port: 8080
+      instance_count: 1
+      instance_size_slug: professional-xs
+      run_command: node server/index.js
+      source_dir: /
+      envs:
+        - key: API_HOST
+          value: localhost
+        - key: API_PORT
+          value: '1337'
+        - key: MAGIC_LINK_REDIRECT
+          value: ${_self.PUBLIC_URL}
+        - key: JWT_SECRET
+          value: ${JWT_SECRET}
+          type: SECRET
+        - key: MONGO_URI
+          value: ${MONGO_URI}
+        - key: EMBEDDINGS_URL
+          value: ${memory.PRIVATE_URL}
+        - key: EMBEDDINGS_BEARER_TOKEN
+          value: ${EMBEDDINGS_BEARER_TOKEN}
+          type: SECRET
+        - key: STORAGE_URL
+          value: ${STORAGE_URL}
+        - key: STORAGE_REGION
+          value: ${STORAGE_REGION}
+        - key: STORAGE_KEY
+          value: ${STORAGE_KEY}
+          type: SECRET
+        - key: STORAGE_SECRET
+          value: ${STORAGE_SECRET}
+          type: SECRET
+        - key: STORAGE_NAME
+          value: ${STORAGE_NAME}
+        - key: OPENAI_KEY
+          value: ${OPENAI_KEY}
+          type: SECRET
+        - key: OPENAI_ORG_ID
+          value: ${OPENAI_ORG_ID}
+        - key: RESEND_SENDING_ADDRESS
+          value: ${RESEND_SENDING_ADDRESS}
+        - key: RESEND_API_KEY
+          value: ${RESEND_API_KEY}
+          type: SECRET
+        - key: RESEND_AUDIENCE_ID
+          value: ${RESEND_AUDIENCE_ID}
+        - key: VITE_API_URL
+          value: ${self.PUBLIC_URL}
+        - key: STRIPE_WEBHOOK_SECRET
+          value: ${STRIPE_WEBHOOK_SECRET}
+          type: SECRET
+
+    - name: memory
+      dockerfile_path: Dockerfile
+      github:
+        branch: main
+        deploy_on_push: true
+        repo: squarecat/chatgpt-retrieval-plugin
+      http_port: 8080
+      instance_count: 1
+      instance_size_slug: professional-xs
+      source_dir: /
+      envs:
+        - key: DATASTORE
+          value: pinecone
+        - key: EMBEDDING_DIMENSION
+          value: '1536'
+        - key: EMBEDDING_MODEL
+          value: text-embedding-3-small
+        - key: BEARER_TOKEN
+          value: ${EMBEDDINGS_BEARER_TOKEN}
+          type: SECRET
+        - key: PINECONE_API_KEY
+          value: ${PINECONE_API_KEY}
+          type: SECRET
+        - key: PINECONE_INDEX_HOST
+          value: ${PINECONE_INDEX_HOST}
+        - key: OPENAI_API_KEY
+          value: ${OPENAI_KEY}
+          type: SECRET

@@ -1,0 +1,69 @@
+summary: Retrieve chat history
+description: Fetches the chat history for a given chat identified by its UUID, excluding system and tool messages.
+operationId: getChatHistory
+
+security:
+  - bearer_auth: []
+
+tags:
+  - Chat
+parameters:
+  - in: header
+    name: Authorization
+    required: true
+    schema:
+      type: string
+      example: 'Bearer sk_test_e2ebe714-2d21-4cbd-895e-a8ae3ecc4462'
+    description: |
+      This request requires a license key to be included in the Authorization header of the request.
+  - in: path
+    name: uuid
+    required: true
+    schema:
+      type: string
+    description: The UUID of the chat for which to retrieve the history.
+responses:
+  '200':
+    description: Chat history retrieved successfully.
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+                format: uuid
+                description: Unique identifier for the chat message.
+              content:
+                type: string
+                description: The content of the chat message.
+                example: Hi there, how can I help today?
+              role:
+                type: string
+                enum:
+                  - system
+                  - user
+                  - tool
+                  - function
+                description: The role associated with this message. See OpenAI's chat API for more details (https://platform.openai.com/docs/api-reference/chat/create)
+              timestamp:
+                type: string
+                format: date-time
+                description: The timestamp when the message was sent.
+            required:
+              - uuid
+              - userUuid
+              - chatUuid
+              - content
+              - role
+              - timestamp
+  '400':
+    description: Bad request, invalid UUID provided.
+  '401':
+    description: Unauthorized, user not authenticated.
+  '404':
+    description: Not found, chat with the given UUID does not exist.
+  '500':
+    description: An error occurred.

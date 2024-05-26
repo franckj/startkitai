@@ -1,0 +1,27 @@
+prompts:
+  # the system prompt
+  system: |
+    Your task is to analyse large numbers of documents and return relevant data.     
+    - You can fetch single documents that are in the document set and use their contents
+    - You can fetch data from our vector database that matches a given question, and use it to answer the query with the "getDocumentSnippet" tool.     
+    - If you're fetching from the vector database with a short query, then it's best to use a low score threshold or you'll get too few matches.
+    - If you're fetching from the vector database with a long query, then it's better with a high score threshold or you'll get too many matches.
+    - If a tool doesn't return any results, you can try again with a different query, you don't need to reply right away.
+    - You can use multi_tool_use.parallel to make multiple tool calls at once.
+    There are {numberOfDocuments} in the document set.
+    The following is the description of the documents provided by the user:
+    {description}
+
+  user: |
+    {query}
+
+options:
+  max_tokens: 2000
+  temperature: 0.7
+  frequency_penalty: 0
+  presence_penalty: 0
+
+# use turbo models for fast replies
+models:
+  - gpt-4-turbo
+  - gpt-3.5-turbo

@@ -1,0 +1,192 @@
+summary: Send a chat message
+operationId: sendChatMessage
+tags:
+  - Chat
+
+description: |-
+  Use this endpoint to send a new message in a chat session and wait for
+  a reply from the AI.
+
+  ### Server Sent Events
+
+  We use event-streams a lot for streaming responses back to the client,
+  this is what creates the feeling that the AI is typing it's reply back
+  to you in real-time, and means we can send very fast partial responses
+  to the user. It's essentially web-sockets but simpler.
+
+  The response is returned as `text/event-stream`, **IMPORTANT** make sure
+  to provide an `Accept` header with your request so the client can bootstrap
+  the connection.
+
+  ```Accept: text/event-stream```
+
+  ### Chat History (optional)
+
+  Chats are organised into sessions, with each session having their history
+  stored into the database.
+
+  Chat history is determined by a `chatUuid` variable. If no `chatUuid` is
+  provided then a new chat session is created and the `chatUuid` for that
+  new session will be returned at the end of the stream.
+
+  ### Context IDs (optional)
+
+  If embeddings have been uploaded via the
+  [Embeddings API](https://startkit.ai/api#/paths/api-embeddings-file/post)
+  then these can be included in the request using the the `contextIds` variable.
+
+  The AI will fetch the context from the embeddings database automatically
+  and use that data in it's response.
+
+  ### Images (optional)
+
+  Images can be provided with the request in base64 format. These images will
+  be interpreted by GPT-4-Vision and the description used in the response.
+
+  For example you can send the message "what is in this image?" along with an
+  image in the image array, and the AI will analyze the image and respond.
+
+security:
+  - bearer_auth: []
+
+parameters:
+  - $ref: ../common/authorization-parameters.yml#/AuthorizationHeader
+  - in: header
+    name: Accept
+    required: true
+    schema:
+      type: string
+      enum:
+        - text/event-stream
+    description: The server will respond with an event-stream
+  - in: query
+    name: asJson
+    schema:
+      type: boolean
+      default: false
+    description: If you want the server to return the content stream as plain JSON. By default it is base64 encoded.
+
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - text
+        properties:
+          text:
+            type: string
+            description: Text of the chat message.
+            example: What is the prime directive?
+          chatUuid:
+            type: string
+            description: UUID of the chat session.
+            example: ae91fe05-f0fc-4285-a605-2bd4c856edae
+          contextIds:
+            type: array
+            items:
+              type: string
+            default: []
+            description: List of context ids you want to use in the request
+            example: ['1710012052356-10430406-warp.pdf']
+          images:
+            type: array
+            items:
+              type: string
+              format: binary
+            default: []
+            example: '[ "data:image/png;base64,iVCAYAAACNbyblAAAAHElEQVQI12Pg==" ]'
+            description: Images to include in the chat message, in base64 format
+
+responses:
+  '200':
+    description: |-
+      The response is Streamed back to the client in Server Sent Events (SSE)
+      "named event" format (read more on MDN [here](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#event_stream_format)
+      or see the example response.
+
+      Each event consists of two lines, an `event` property and a `data` property.
+      Each token of content from the AI will be delivered with a `content` event.
+
+
+      ```yaml
+      # POST http://localhost:1337/api/chat?asJson=true
+      # { text: "Hello" }
+
+      event: content
+      data: ["Hi"]
+
+      event: content
+      data: ["there"],
+
+      event: content
+      data: ["how can"]
+
+      event: content
+      data: ["I help?"]
+      ```
+
+      The stream will end with a `result` event being sent.
+
+      ```yaml
+      event: result
+      data: {
+        "cost": 0.004,
+        "model": "gpt-4-turbo",
+        "chatUuid": "2c2ddb1e-b6c8-4a74-b2ce-3316147e3043"
+      }
+      ```
+
+      By default the content in the stream will be base64 encoded, this makes it easy to
+      escape special characters and newlines that might otherwise break the stream.
+
+      If you want the response to be delivered as above with the text visible for
+      debug purposes then provide the query parameter ?asJson=true to the request.
+
+    headers:
+      Cache-Control:
+        schema:
+          type: string
+        example: no-cache
+      Connection:
+        schema:
+          type: string
+        example: keep-alive
+      Content-Type:
+        schema:
+          type: string
+        example: text/event-stream
+    content:
+      text/event-stream:
+        schema:
+          type: string
+          example: |-
+            event: content
+            data: Hi
+
+            event: content
+            data: there,
+
+            event: content
+            data: how can
+
+            event: content
+            data: I help?
+
+            event: result
+            data: {
+              "cost": 0.004,
+              "model": "gpt-4-turbo",
+              "chatUuid": "2c2ddb1e-b6c8-4a74-b2ce-3316147e3043"
+            }
+  '400':
+    description: Bad request, text or at least one image is required.
+  '401':
+    description: Unauthorized, user not authenticated.
+  '406':
+    description: Not acceptable, the Accept header was omitted or was not "text/event-stream" (see above).
+  '429':
+    description: Too many requests, usage limit exceeded.
+  '500':
+    description: An error occurred.

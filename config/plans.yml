@@ -1,0 +1,68 @@
+# Used for synchronising plans with Stripe and
+# setting API usage limits.
+# Make sure you have set up the plans in Stripe
+# and set the stripe_price_id for each plan
+default_plan_id: 1
+plans:
+  - name: Free
+    id: 1
+    price: 0
+    limits:
+      daily:
+        total_requests: 50
+        total_cost: 0.2
+        chat_requests: 20
+        chat_cost: 4
+        tts_requests: 3
+        tts_cost: 4
+        stt_requests: 4
+        stt_cost: 4
+        image_requests: 3
+        image_cost: 1
+        vision_requests: 2
+        vision_cost: 1
+      monthly:
+        total_requests: 50
+        total_cost: 0.2
+        chat_requests: 20
+        chat_cost: 4
+        tts_requests: 3
+        tts_cost: 4
+        stt_requests: 4
+        stt_cost: 4
+        image_requests: 3
+        image_cost: 1
+        vision_requests: 2
+        vision_cost: 1
+
+  - name: Basic
+    id: 2
+    price: 19
+    stripe_price_id:
+    # API limits for daily or monthly usage
+    # can omit limits that are not required
+    limits:
+      daily:
+        total_requests: 100
+        chat_requests: 10
+        image_requests: 10
+        tts_requests: 10
+        vision_requests: 10
+        total_cost: 0.5
+      monthly:
+        total_requests: 100
+        chat_requests: 10
+        tts_requests: 10
+        image_requests: 10
+        vision_requests: 10
+        total_cost: 0.5
+
+  - name: Pro
+    id: 3
+    price: 99
+    stripe_price_id:
+    limits:
+      daily:
+        total_requests: 10000
+      monthly:
+        total_requests: 1000000

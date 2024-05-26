@@ -1,0 +1,77 @@
+ImageResponse:
+  type: object
+  properties:
+    images:
+      type: array
+      items:
+        type: object
+        properties:
+          url:
+            type: string
+            description: The URL of the created image
+            example: 'https://sfo3.digitaloceanspaces.com/startkitai/494226b2-1059-4957-982a-f785b29b57e5/generated-images/f590287b-7ed1-4ddf-acfc-a76539c56202.png'
+      description: List of created images.
+
+    usage:
+      type: array
+      items:
+        type: object
+        properties:
+          model:
+            type: string
+          size:
+            type: string
+            enum:
+              - 1024x1024
+              - 512x512
+          quality:
+            type: string
+          cost:
+            type: number
+            format: float
+        example:
+          model: 'dall-e-2'
+          size: '1024x1024'
+          quality: standard
+          cost: 0.02
+
+ImageRevisionResponse:
+  type: object
+  properties:
+    images:
+      type: array
+      items:
+        type: object
+        properties:
+          url:
+            type: string
+            description: The URL of the created image
+            example: 'https://sfo3.digitaloceanspaces.com/startkitai/494226b2-1059-4957-982a-f785b29b57e5/generated-images/f590287b-7ed1-4ddf-acfc-a76539c56202.png'
+          revised_prompt:
+            type: string
+            description: DALL-E will rephrase your original prompt to improve it
+            example: 'A visual representation of a celestial alien squid-like creature, gliding effortlessly in the vastness of outer space. It is navigating fluidly around an advanced, large, multi-decked spaceship, exuding a futuristic architectural design akin to the 24th-century star fleet aesthetic.'
+      description: List of created images.
+
+    usage:
+      type: array
+      items:
+        type: object
+        properties:
+          model:
+            type: string
+          size:
+            type: string
+            enum:
+              - 1024x1024
+              - 512x512
+          quality:
+            type: string
+          cost:
+            type: number
+            format: float
+        example:
+          model: 'dall-e-2'
+          size: '1024x1024'
+          quality: standard
+          cost: 0.02

@@ -1,0 +1,108 @@
+openapi: '3.0.0'
+
+info:
+  title: StartKit.AI API
+  version: '1.0.0'
+  description:
+    $ref: './description.yml#/introduction'
+  license:
+    name: Apache 2.0
+    url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
+  contact:
+    name: StartKit.AI Team
+    email: hi@startkit.ai
+  termsOfService: 'https://startkit.ai/tos'
+
+servers:
+  - url: https://startkit.ai
+    description: Production server (uses live data)
+  - url: http://localhost:1337
+    description: Local development server
+
+tags:
+  - name: Chat
+    description: Chat API Reference
+  - name: Moderation
+    description: Moderation API Reference
+  - name: Images
+    description: Images API Reference
+  - name: Speech
+    description: Speech API Reference
+  - name: Embeddings
+    description: Embeddings API Reference
+  - name: Detect
+    description: Detect API Reference
+
+paths:
+  /api/chat:
+    post:
+      $ref: './chat/send-chat-message.yml'
+  /api/chat/{uuid}/history:
+    get:
+      $ref: './chat/get-chat-history.yml'
+  /api/chat/{uuid}/share:
+    put:
+      $ref: './chat/set-sharable.yml'
+
+  /api/moderation/harmful:
+    post:
+      $ref: './moderation/check-harmful.yml'
+  /api/moderation/harmful/categories:
+    get:
+      $ref: './moderation/get-categories.yml'
+  /api/moderation/sentiment:
+    post:
+      $ref: './moderation/get-sentiment.yml'
+  /api/moderation/redact:
+    post:
+      $ref: './moderation/redaction.yml'
+
+  /api/embeddings/file:
+    post:
+      $ref: './embeddings/embed-file.yml'
+  /api/embeddings/csv:
+    post:
+      $ref: './embeddings/embed-csv.yml'
+  /api/embeddings/urls:
+    post:
+      $ref: './embeddings/embed-urls.yml'
+
+  /api/images/create:
+    post:
+      $ref: './images/create-image.yml'
+  /api/images/detect:
+    post:
+      $ref: './images/detect-image.yml'
+  /api/images/variation:
+    post:
+      $ref: './images/create-variations.yml'
+  /api/images/inpainting:
+    post:
+      $ref: './images/inpainting.yml'
+  /api/images/outpainting:
+    post:
+      $ref: './images/outpainting.yml'
+
+  /api/speech/from-text:
+    post:
+      $ref: './speech/from-text.yml'
+
+  /api/speech/translate/from-audio:
+    post:
+      $ref: './speech/translate-from-audio.yml'
+
+  /api/speech/transcribe:
+    post:
+      $ref: './speech/transcribe.yml'
+
+  /api/detect/file:
+    post:
+      $ref: './detect/file.yml'
+
+components:
+  securitySchemes:
+    bearer_auth:
+      type: http
+      scheme: bearer
+      description: |-
+        This request requires a license key to be included in the Authorization header of the request.

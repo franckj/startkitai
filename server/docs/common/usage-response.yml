@@ -1,0 +1,21 @@
+UsageResponse:
+  type: array
+  items:
+    type: object
+    properties:
+      model:
+        type: string
+      promptTokens:
+        type: integer
+        format: int32
+      completionTokens:
+        type: integer
+        format: int32
+      cost:
+        type: number
+        format: float
+  example:
+    model: 'gpt-4-turbo'
+    promptTokens: 44
+    completionTokens: 989
+    cost: 0.012
